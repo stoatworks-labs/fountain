@@ -59,8 +59,9 @@ ControlInfo event( unsigned int id, const char* name, const char* group )
 
 //---------------------------------------------------------------------------
 // The defaults: the Show layout at 6 m of head, half of it from the music,
-// shooters on the beat and led onto it, a 3 mm nozzle that turns a tall jet to
-// beads near its top. AGENTS.md ("Decisions") says how they were chosen.
+// shooters on the beat and led onto it, a 4 mm nozzle disturbed to ln 9 that
+// turns a tall jet to beads near its top, and enough gust to tear the mist.
+// AGENTS.md ("Decisions") says how they were chosen, over Resolume's own clips.
 //---------------------------------------------------------------------------
 const ControlInfo kTable[] = {
 	option( PT_LAYOUT, "Layout", "Fountain", 0.0f, kLayoutNames, static_cast< int >( LayoutId::Count ) ),
@@ -73,13 +74,13 @@ const ControlInfo kTable[] = {
 	standard( PT_LEAD, "Lead", "Fountain", ParamFromLead( 1.0 ) ),
 	standard( PT_SENSITIVITY, "Sensitivity", "Fountain", 0.5f ),
 
-	standard( PT_NOZZLE, "Nozzle", "Water", ParamFromNozzle( 3e-3 ) ),
-	standard( PT_BREAKUP, "Breakup", "Water", ParamFromDisturbance( 11.0 ) ),
+	standard( PT_NOZZLE, "Nozzle", "Water", ParamFromNozzle( 4e-3 ) ),
+	standard( PT_BREAKUP, "Breakup", "Water", ParamFromDisturbance( 9.0 ) ),
 	standard( PT_VALVE, "Valve", "Water", ParamFromValve( 0.06 ) ),
 	standard( PT_PUMP, "Pump", "Water", ParamFromPump( 0.6 ) ),
 
 	standard( PT_WIND, "Wind", "Air", ParamFromWind( 0.0 ) ),
-	standard( PT_GUST, "Gust", "Air", 0.25f ),
+	standard( PT_GUST, "Gust", "Air", 0.35f ),
 	standard( PT_SCREEN, "Screen", "Air", 0.5f ),
 
 	standard( PT_VIEW, "View", "View", ParamFromView( 10.0 ) ),

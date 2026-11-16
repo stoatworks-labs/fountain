@@ -95,8 +95,8 @@ constexpr double kMistDropRadius = 50e-6;
 /// to the air is v_s / g.
 constexpr double kMistSettle = 0.30;
 /// CHOSEN: the spray parcel's spread, m, and how it grows (m^2/s).
-constexpr double kMistSigma0 = 0.12;
-constexpr double kMistDiffusion = 0.05;
+constexpr double kMistSigma0 = 0.20;
+constexpr double kMistDiffusion = 0.02;
 /// CHOSEN: evaporation e-folding, s.
 constexpr double kMistEvaporate = 4.0;
 

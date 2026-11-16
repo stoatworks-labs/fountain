@@ -978,8 +978,14 @@ int main( int argc, char** argv )
 			             "  --pipe            raw RGBA frames in on stdin, out on stdout\n"
 			             "  --film N          N frames, raw RGBA on stdout\n"
 			             "  --script PATH     cues for --pipe/--film: 'frame Name value'\n\n"
-			             "  checks: see tools/verify.sh;  --negative   --bench\n"
-			             "  --offline         the checks and negative controls that need no GL context (CI)\n" );
+			             "  --all             every check below, at 1280x720 and 320x180 (--size: that raster alone)\n"
+			             "  --negative        each check against the wrong models it must catch\n"
+			             "  --bench           ms a frame at 720p, 1080p and 4K\n"
+			             "  --offline         the checks and negative controls that need no GL context (CI)\n\n"
+			             "  checks, one flag each:" );
+			for( const CheckEntry& check : checks() )
+				std::printf( " --%s", check.flag );
+			std::printf( "\n" );
 			return 0;
 		}
 		else if( argument == "--over" )
@@ -1081,6 +1087,23 @@ int main( int argc, char** argv )
 
 	if( ran )
 		;
+	else if( mode == "all" )
+	{
+		std::vector< std::string > failed;
+		for( const CheckEntry& check : checks() )
+		{
+			std::printf( "\n== %s ==\n", check.flag );
+			const int before = g_failures;
+			check.run( Perturb {} );
+			if( g_failures != before )
+				failed.push_back( check.flag );
+		}
+		std::printf( "\n%zu checks, %d measurements, %zu failed", checks().size(), g_checks, failed.size() );
+		for( const std::string& name : failed )
+			std::printf( " %s", name.c_str() );
+		std::printf( "\n" );
+		result = failed.empty() ? 0 : 1;
+	}
 	else if( mode == "pipe" )
 		result = runPipe( over, width, height, fps, bpm, scriptPath, 0, true, settings, kicks );
 	else if( mode == "film" )

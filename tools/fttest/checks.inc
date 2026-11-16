@@ -114,7 +114,7 @@ double air( double x, double t, double wind, double gust )
 	double s        = 0.0;
 	for( int i = 0; i < 3; ++i )
 		s += weight[ i ] * std::sin( 2.0 * kPi * ( xi / length[ i ] - t / period[ i ] ) + phase[ i ] );
-	return wind + gust * ( 1.0 + std::fabs( wind ) ) * s;
+	return wind + gust * ( 2.0 + std::fabs( wind ) ) * s;
 }
 } // namespace ref
 

@@ -93,7 +93,7 @@ double Sim::DropFactor() const
 
 double Sim::bandLevel( Role role ) const
 {
-	const int band = role == Role::Shooter ? 0 : ( role == Role::Arc ? 1 : 2 );
+	const int band = role == Role::Shooter ? 0 : 1;
 	return std::clamp( inputs.level[ band ], 0.0, 1.0 );
 }
 
@@ -152,7 +152,7 @@ double Sim::AirVelocity( double x, double t, double wind, double gust )
 	static constexpr double kPhase[ 3 ]  = { 0.3, 2.1, 4.4 };
 	if( gust <= 0.0 )
 		return wind;
-	const double amplitude = gust * ( 1.0 + std::fabs( wind ) );
+	const double amplitude = gust * ( 2.0 + std::fabs( wind ) );
 	const double xi        = x - wind * t;
 	double sum             = 0.0;
 	for( int i = 0; i < 3; ++i )
@@ -598,11 +598,13 @@ void Sim::Advance( double dtIn, const SimInputs& in )
 	{
 		const Nozzle& n = ( *nozzles )[ static_cast< size_t >( i ) ];
 		Jet& jet        = jets[ static_cast< size_t >( i ) ];
-		const double share = n.role == Role::Mist ? kMistHead : n.head;
+		//The shooters follow the Low band and the arcs the Mid; the mist bar is a
+		//screen and runs steady at Pressure x kMistHead, whatever the music.
+		const double share  = n.role == Role::Mist ? kMistHead : n.head;
+		const double r      = std::clamp( in.response, 0.0, 1.0 );
+		const double drive  = n.role == Role::Mist ? 1.0 : 1.0 - r + r * bandLevel( n.role );
 		jet.headStart   = jet.head;
-		jet.headCommand = active( i ) ? std::max( 0.0, in.pressure ) * share
-		                                    * ( 1.0 - std::clamp( in.response, 0.0, 1.0 ) + std::clamp( in.response, 0.0, 1.0 ) * bandLevel( n.role ) )
-		                              : 0.0;
+		jet.headCommand = active( i ) ? std::max( 0.0, in.pressure ) * share * drive : 0.0;
 		jet.head = headAt( jet, t1 );
 		jet.openingStart = jet.opening;
 		if( n.role == Role::Mist && active( i ) )

@@ -59,14 +59,14 @@ struct SimInputs
 	FireOn fireOn        = FireOn::Beat;
 	double shot          = 0.15; ///< s
 	double lead          = 1.0;  ///< x the command-to-peak time
-	double nozzle        = 3e-3; ///< a0, m
-	double lnDisturbance = 11.0; ///< ln( a0 / delta0 )
+	double nozzle        = 4e-3; ///< a0, m
+	double lnDisturbance = 9.0;  ///< ln( a0 / delta0 )
 	double valveTau      = 0.06; ///< s
 	double pumpTau       = 0.6;  ///< s
 	double wind          = 0.0;  ///< m/s, +x
-	double gust          = 0.25; ///< 0..1
+	double gust          = 0.35; ///< 0..1
 	double screen        = 0.5;  ///< 0..1
-	double level[ 3 ]    = {};   ///< Low, Mid, High, 0..1
+	double level[ 3 ]    = {};   ///< Low (shooters), Mid (arcs), High (unused: the mist runs steady), 0..1
 	bool onset           = false;
 	int presses          = 0;
 	double bpm           = 120.0;
@@ -143,7 +143,7 @@ public:
 	/// Spray parcels a second, per emitter, at any flow.
 	static constexpr double kSprayRate = 40.0;
 	/// m^3/s per metre of bar at Screen 1 and full mist head.
-	static constexpr double kMaxFlowPerMetre = 0.4e-3;
+	static constexpr double kMaxFlowPerMetre = 0.12e-3;
 	/// The mist pump's share of Pressure, and the updraft's share of its head.
 	static constexpr double kMistHead = 1.6, kPlumeShare = 0.7;
 	/// CHOSEN: the plume's air keeps moving after the spray changes; its
@@ -162,7 +162,7 @@ public:
 
 	/// The air's horizontal velocity at x, sim time t: Wind plus three
 	/// travelling gusts (chosen wavelengths and periods), frozen turbulence
-	/// carried by the mean wind.
+	/// carried by the mean wind, of amplitude Gust x ( 2 + |Wind| ) m/s.
 	static double AirVelocity( double x, double t, double wind, double gust );
 
 	/// The model's own time from a shooter's valve command to its column's
