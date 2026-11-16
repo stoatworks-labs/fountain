@@ -20,8 +20,8 @@
 	all of them. Nobody has measured where Resolume's 64 bins sit in frequency
 	(fleet-wide); for a buffer linear from 0 to Nyquist that is roughly two
 	octaves a band, and for anything else it is differently weighted. Each band
-	is normalised against its own recent peak, so a quiet High band still
-	drives its pump.
+	is normalised against its own recent peak, so a quiet Mid band still
+	drives the arcs' pump.
 
 	**Where the audio comes from.** FFGL has no audio path. What Resolume
 	provides is a buffer parameter declared `FF_USAGE_FFT`, which the host

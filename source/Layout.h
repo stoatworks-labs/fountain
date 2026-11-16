@@ -11,8 +11,8 @@
       follows the Low band.
     - **Arcs** lean. Their valves stay open; their pump follows the Mid band,
       so their reach (2 H sin 2 theta, drag-free) breathes with the mids.
-    - **Mist** emitters stand in a bar and spray the screen; their pump follows
-      the High band.
+    - **Mist** emitters stand in a bar and spray the screen; their pump runs
+      steady at Pressure x 1.6, whatever the music (a screen, not a dancer).
 
     The basin is seen face-on, so a nozzle is a point on the waterline (y = 0)
     and a direction in the picture's plane.
