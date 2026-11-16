@@ -51,7 +51,6 @@ void Analyser::Reset()
 	level = peak = flux = fluxMean = held = refractory = 0.0f;
 	fired  = false;
 	primed = false;
-	seeded = false;
 }
 
 void Analyser::Update( const float* bins, int count, float dt, const Settings& settings )
@@ -143,22 +142,6 @@ void Analyser::Update( const float* bins, int count, float dt, const Settings& s
 		primed = true;
 		if( !neverPrime )
 			flux = 0.0f;
-	}
-	//---------------------------------------------------------------------
-	// And the second frame. Its flux is the first that means anything, and
-	// the adaptive floor it is judged against has been climbing from zero,
-	// with a one-second time constant, since the first. Against a floor of
-	// nearly nothing a busy hi-hat IS an onset, every refractory period,
-	// for about a second: measured on fttest's music before this, a burst
-	// of shots from frame 1 and the kick at 0.25 s lost among them. So the
-	// first real flux seeds the floor instead of being compared with it.
-	// (fountain's fix; ferrofluid's analyser primes but does not seed.)
-	//---------------------------------------------------------------------
-	else if( !seeded && dt > 0.0f )
-	{
-		seeded = true;
-		if( !neverPrime )
-			fluxMean = flux;
 	}
 
 	peak = std::max( level, peak - ( peak - kPeakFloor ) * peakFall );

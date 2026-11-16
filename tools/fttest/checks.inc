@@ -703,55 +703,74 @@ int runBreakup( const Perturb& perturb )
 int runLead( const Perturb& perturb )
 {
 	std::printf( "\n=== lead: at the defaults (valve and pump lag, drag, breakup), host beats at 120 BPM -- a parabola through the column's top\n"
-	             "    peaks on the beat, to the frame (camera zoomed to View 5 m; the centre shooter solo)\n" );
-	for( const Raster& raster : kRasters )
+	             "    peaks on the beat, to the frame (the centre shooter solo). Twice: at the default Pressure, camera zoomed to View 5 m,\n"
+	             "    where the column is still intact at its apex, and at 12 m, where it pinches off well below it and the prediction has\n"
+	             "    to include the beads' rise against drag -- fired once a bar there, so a lead a whole beat out cannot pass for right\n" );
+	struct Case
 	{
-		Rig rig;
-		rig.bpm = 120.0;
-		SimHooks base;
-		base.solo = 1ull << kShowCentre;
-		if( !startRig( rig, raster.w, raster.h, perturb, base ) )
-			return 1;
-		defaults( rig );
-		rig.Set( PT_VIEW, ParamFromView( 5.0 ) );
-		rig.Set( PT_LAMPS, static_cast< int >( Lamps::White ) );
-		rig.Set( PT_EXPOSURE, ParamFromExposure( 1.0 ) );
-		if( perturb.leadZero )
-			rig.Set( PT_LEAD, 0.0f );
-		if( !rig.Render( 300 ) )
-			return 1;
-		std::map< int, double > top;
-		const int first = rig.frame;
-		for( int f = first; f < first + 240; ++f )
+		const char* name;
+		double pressure, view;
+		FireOn fireOn;
+		int period, frames, peaks;///< frames between cues, frames measured, peaks required
+	};
+	const Case cases[] = { { "default Pressure, on the beat", 6.0, 5.0, FireOn::Beat, 30, 240, 6 },
+		                   { "Pressure 12 m, on the bar", 12.0, 10.0, FireOn::Bar, 120, 480, 3 } };
+	for( const Raster& raster : kRasters )
+		for( const Case& c : cases )
 		{
-			if( !rig.Render( 1 ) )
+			Rig rig;
+			rig.bpm = 120.0;
+			SimHooks base;
+			base.solo = 1ull << kShowCentre;
+			if( !startRig( rig, raster.w, raster.h, perturb, base ) )
 				return 1;
-			const Picture pic = pictureOf( rig );
-			top[ f ]          = stripTop( pic, pic.px( 0.0 ), std::max( 4, static_cast< int >( 0.25 * pic.scale ) ) );
-		}
-		double worst = 0.0;
-		int beats    = 0;
-		bool shaped  = true;
-		for( int beat = first + 30 - first % 30; beat + 12 < first + 240; beat += 30 )
-		{
-			std::vector< double > u, y;
-			for( int f = beat - 12; f <= beat + 12; ++f )
+			defaults( rig );
+			rig.Set( PT_PRESSURE, ParamFromPressure( c.pressure ) );
+			rig.Set( PT_VIEW, ParamFromView( c.view ) );
+			rig.Set( PT_FIRE_ON, static_cast< int >( c.fireOn ) );
+			rig.Set( PT_LAMPS, static_cast< int >( Lamps::White ) );
+			rig.Set( PT_EXPOSURE, ParamFromExposure( 1.0 ) );
+			if( perturb.leadZero )
+				rig.Set( PT_LEAD, 0.0f );
+			if( !rig.Render( 300 ) )
+				return 1;
+			std::map< int, double > top;
+			const int first = rig.frame;
+			for( int f = first; f < first + c.frames; ++f )
 			{
-				u.push_back( f - beat );
-				y.push_back( top[ f ] );
+				if( !rig.Render( 1 ) )
+					return 1;
+				const Picture pic = pictureOf( rig );
+				top[ f ]          = stripTop( pic, pic.px( 0.0 ), std::max( 4, static_cast< int >( 0.25 * pic.scale ) ) );
 			}
-			double k[ 3 ];
-			if( !fitParabola( u, y, k ) || k[ 2 ] >= 0.0 )
+			double worst = 0.0;
+			int beats    = 0;
+			bool shaped  = true;
+			for( int beat = first + c.period - first % c.period; beat + 12 < first + c.frames; beat += c.period )
 			{
-				shaped = false;
-				continue;
+				std::vector< double > u, y;
+				for( int f = beat - 12; f <= beat + 12; ++f )
+				{
+					u.push_back( f - beat );
+					y.push_back( top[ f ] );
+				}
+				double k[ 3 ];
+				if( !fitParabola( u, y, k ) || k[ 2 ] >= 0.0 )
+				{
+					shaped = false;
+					continue;
+				}
+				worst = std::max( worst, std::fabs( -k[ 1 ] / ( 2.0 * k[ 2 ] ) ) );
+				++beats;
 			}
-			worst = std::max( worst, std::fabs( -k[ 1 ] / ( 2.0 * k[ 2 ] ) ) );
-			++beats;
+			const Sim& sim       = rig.plugin.State();
+			const double v       = sim.SpeedFor( kShowCentre, 1.0 - std::exp( -sim.Inputs().shot / sim.Inputs().valveTau ), sim.Head( kShowCentre ) );
+			const double apex    = v / ref::g;
+			Check( shaped && beats >= c.peaks && worst <= 1.0,
+			       fmt( "%4dx%-4d %s: %d cues, the fitted peak at most %.2f frames from the cue (tolerance 1 frame); command-to-peak %.4f s;"
+			            " pinch-off at age %.3f s, the drag-free apex at %.3f s",
+			            raster.w, raster.h, c.name, beats, worst, sim.CommandToPeak( kShowCentre ), sim.BreakupAgeNow(), apex ) );
 		}
-		Check( shaped && beats >= 6 && worst <= 1.0, fmt( "%4dx%-4d %d beats: the fitted peak at most %.2f frames from the beat (tolerance 1 frame); command-to-peak %.4f s",
-		                                                  raster.w, raster.h, beats, worst, rig.plugin.State().CommandToPeak( kShowCentre ) ) );
-	}
 	return Verdict();
 }
 
@@ -1088,7 +1107,8 @@ int runState( const Perturb& perturb )
 //===========================================================================
 int runClock( const Perturb& perturb )
 {
-	std::printf( "\n=== clock: a host clock at 4.99e8 ms (Resolume's has been seen there) renders the frames a clock from 0 s does\n" );
+	std::printf( "\n=== clock: a host clock at 4.99e8 ms (Resolume's has been seen there) renders the frames a clock from 0 s does,\n"
+	             "    and a clock left to settle its own unit settles on the right one\n" );
 	for( const Raster& raster : kRasters )
 	{
 		Rig zero, late;
@@ -1113,6 +1133,28 @@ int runClock( const Perturb& perturb )
 			total += a.size();
 		}
 		Check( differ == 0, fmt( "%4dx%-4d frames 60, 120, 180: %zu of %zu values differ (bit-exact, same context)", raster.w, raster.h, differ, total ) );
+
+		//The unit, unforced: this harness renders far faster than real time,
+		//as an offline host or oxbow's selftest does, so the wall-clock vote
+		//cannot settle it and the step's size has to.
+		for( const double unit : { 1.0, 1000.0 } )
+		{
+			Rig r;
+			if( !startRig( r, raster.w, raster.h, perturb, SimHooks {} ) )
+				return 1;
+			r.plugin.SetClockScaleForTest( 0.0 );
+			r.timeOffset = unit == 1.0 ? 12.5 : 4.99e8;
+			r.timeScale  = unit;
+			if( !r.Render( 60 ) )
+				return 1;
+			const double want = 1.0 / unit;
+			const double got  = r.plugin.ClockScale();
+			const double host = ( r.timeOffset + r.timeScale * r.Seconds( r.frame - 1 ) ) * want;
+			Check( got == want && std::fabs( r.plugin.HostNow() - host ) < 1e-6,
+			       fmt( "%4dx%-4d a host clock in %s at 60 fps, rendered faster than real time: settled on %s by frame 60, and reads %.6f s (host %.6f s)",
+			            raster.w, raster.h, unit == 1.0 ? "seconds" : "milliseconds", got == 1.0 ? "seconds" : ( got == 0.001 ? "milliseconds" : "nothing" ),
+			            r.plugin.HostNow(), host ) );
+		}
 	}
 	return Verdict();
 }

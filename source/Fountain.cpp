@@ -18,6 +18,9 @@ namespace
 {
 /// Frames that must agree before the host's clock unit is settled.
 constexpr int kClockVotes = 4;
+/// Frames of advancing host time after which an unsettled vote is decided by
+/// the size of the host's step alone (UpdateClock).
+constexpr int kClockPatience = 30;
 /// Host seconds a single frame may advance by.
 constexpr double kMaxFrameDelta = 0.1;
 
@@ -314,6 +317,17 @@ void FountainPlugin::UpdateClock()
 				clockScale  = millisVotes > secondsVotes ? 0.001 : 1.0;
 				settledJump = true;//wall time to the host's own: no dt across it
 			}
+		}
+		//A host that renders much faster than real time -- an offline render,
+		//oxbow's selftest, fttest -- never wins the vote, and the fountain would
+		//run on the wall clock: 120 frames in a fifth of a second, and the
+		//Over still black (oxbow's selftest, before this). So after
+		//kClockPatience frames the step's size decides: a frame is well under
+		//a second and well over a millisecond (fountain's addition).
+		if( hostDelta > 0.0 && clockScale == 0.0 && ++clockSamples >= kClockPatience )
+		{
+			clockScale  = hostDelta < 1.0 ? 1.0 : 0.001;
+			settledJump = true;
 		}
 	}
 	if( raw >= 0.0 )

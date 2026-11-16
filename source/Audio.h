@@ -12,8 +12,8 @@
 	its flux is taken over the lowest quarter of the bins only, so kicks and
 	snares fire the shooters and hi-hats do not)
 	and the band levels (what each pump's head follows: Low the shooters, Mid
-	the arcs, High the mist bar), including the primed first frame that keeps
-	it from going deaf on a clip trigger.
+	the arcs; the mist bar runs steady), including the primed first frame that
+	keeps it from going deaf on a clip trigger.
 
 	**The bands** are abomerration's split, logarithmic in bin index: Low is
 	the first sixteenth of the bins, Mid up to a quarter, High the rest, Full
@@ -88,8 +88,7 @@ public:
 	/// Forget everything. Used when the host's clock jumps.
 	void Reset();
 
-	/// The --late negative control: the cold start left as it was, neither
-	/// primed nor seeded.
+	/// The --late negative control: the cold start left as it was, unprimed.
 	void SetUnprimedForTest( bool on )
 	{
 		neverPrime = on;
@@ -116,8 +115,6 @@ private:
 	/// against a buffer of zeroes reports the entire spectrum as a rise. See
 	/// Update().
 	bool primed = false;
-	/// False until the first frame WITH a flux (the second): see Update().
-	bool seeded = false;
 	bool neverPrime = false;
 
 	unsigned long long onsets = 0;

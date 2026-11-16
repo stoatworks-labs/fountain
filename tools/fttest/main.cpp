@@ -799,16 +799,22 @@ void writeSpectrum( FountainPlugin& plugin, const std::function< double( int ) >
 /// The harness's music: a steady bass bed in the low quarter (so the first
 /// frame of a cold start is not a rise from nothing), a busy hi-hat at the
 /// top (a fresh level every frame) and a kick on frames `first`,
-/// `first + every`, ..., soft and hard by turns.
-void feedKicks( FountainPlugin& plugin, int frame, int first = 0, int every = 30 )
+/// `first + every`, ..., soft and hard by turns. With `ghosts`, a ghost note
+/// a thirtieth of a soft kick halfway between: an onset only a high
+/// Sensitivity hears (measured: 6 onsets in 3 s at Sensitivity 0 and 0.5, 10
+/// at 1; tools/sweep.py sweeps Sensitivity on it).
+void feedKicks( FountainPlugin& plugin, int frame, int first = 0, int every = 30, bool ghosts = false )
 {
 	const int since  = frame >= first ? ( frame - first ) % every : every;
 	const bool hard  = frame >= first && ( ( frame - first ) / every ) % 2 == 1;
+	const int ghost  = ( since - every / 2 + every ) % every;
 	const double hat = 0.3 * hash01( static_cast< uint32_t >( frame ), 11 );
 	writeSpectrum( plugin, [ & ]( int b ) {
 		double v = b < 16 ? 0.15 : ( b > 40 ? 0.02 + hat : 0.02 );
 		if( since < 4 && b < 10 )
 			v += ( hard ? 0.9 : 0.6 ) * std::exp( -since * 0.8 );
+		if( ghosts && frame >= first && ghost < 4 && b < 10 )
+			v += 0.02 * std::exp( -ghost * 0.8 );
 		return v;
 	} );
 }
@@ -882,7 +888,7 @@ int runPipe( bool over, int width, int height, double fps, double bpm, const std
 			}
 		}
 		if( kicks )
-			feedKicks( rig.plugin, index );
+			feedKicks( rig.plugin, index, 0, 30, true );
 		//A track does nothing before its first key: a press cued at frame 30
 		//must not be held from frame 0 (honeydew's trap).
 		for( const auto& cue : automation )
@@ -972,7 +978,7 @@ int main( int argc, char** argv )
 			             "  --bpm N           the synthetic beat (default 120; 0 sends none)\n"
 			             "  --set \"Name=V\"    set a parameter by its display name (an option by its name). Repeatable.\n"
 			             "  --at N \"Name=V\"  (with --out) set it at frame N instead; an event is released the frame after\n"
-			             "  --kicks           the harness's music in the Audio buffer: a kick every half second\n"
+			             "  --kicks           the harness's music in the Audio buffer: a kick every half second, a ghost note between\n"
 			             "  --draw N          (with --out) which water is drawn: 1 columns, 2 beads, 4 spray (default 7)\n"
 			             "  --list            every parameter and its default\n"
 			             "  --pipe            raw RGBA frames in on stdin, out on stdout\n"
@@ -1156,7 +1162,7 @@ int main( int argc, char** argv )
 			for( int f = 0; f < std::max( frames, 1 ) && rendered; ++f )
 			{
 				if( kicks )
-					feedKicks( rig.plugin, f );
+					feedKicks( rig.plugin, f, 0, 30, true );
 				for( const auto& r : release )
 					if( r.first == f )
 					{

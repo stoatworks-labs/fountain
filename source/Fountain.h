@@ -125,6 +125,11 @@ public:
 	{
 		return now;
 	}
+	/// The host clock's unit as settled: 1 seconds, 0.001 milliseconds, 0 not yet.
+	double ClockScale() const
+	{
+		return clockScale;
+	}
 
 private:
 	void UpdateClock();
@@ -161,6 +166,7 @@ private:
 	double wallStart    = -1.0;
 	int secondsVotes    = 0;
 	int millisVotes     = 0;
+	int clockSamples    = 0;
 	int clockFrames     = 0;
 	bool settledJump    = false;
 	double now          = 0.0;
