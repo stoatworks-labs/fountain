@@ -106,9 +106,13 @@ parallel) is not used.
   random level at the top, a kick every half second, soft and hard by turns, and with `--kicks`
   a ghost note a thirtieth of a soft kick between them that only a high Sensitivity hears
   (6 onsets in 3 s at Sensitivity 0 and 0.5, 10 at 1).
-- **CI.** `.github/workflows/ci.yml` and `release.yml` are ferrofluid's, adapted, and have
-  never run: there is no remote. GitHub Actions belongs on public repos only; if this repo is
-  ever created private, delete them first.
+- **CI.** `.github/workflows/ci.yml` and `release.yml` are ferrofluid's, adapted, and were
+  brought up to radar's and xenon's when the repo went public on 2026-11-18: macOS on
+  macos-15, vcpkg's applocal copy off (two plugins once raced it), both DLLs loaded as a host
+  loads them by `tools/wincheck.ps1`, ATTRIBUTIONS.md in each zip, and the Windows installer
+  built with release-lib's `--ffgl` (per user, into Documents\Resolume Arena\Extra Effects).
+  `scripts/release-lib.sh` is stoatworks-backend's. GitHub Actions belongs on public repos
+  only; if this repo is ever made private, delete them first.
 - **Provisional hand copies**: `source/StoatworksAbout*.h` (zoetrope's first header, guide
   "") and `ATTRIBUTIONS.md`, whose repo URLs for ferrofluid, millpond, zoetrope and throw are
   assumed to be `stoatworks-labs/<name>`.

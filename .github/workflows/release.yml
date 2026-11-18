@@ -1,7 +1,8 @@
 name: release
 
-# ferrofluid's release, adapted. NEVER RUN: this repo has not been pushed
-# anywhere, and GitHub Actions belongs on public repos only (the fleet's rule).
+# ferrofluid's release, adapted, brought up to radar's and xenon's on
+# 2026-11-18 when the repo went public (GitHub Actions belongs on public repos
+# only, the fleet's rule).
 #
 # Build the Fountain FFGL plugins (a source and an effect) for the two platforms Resolume runs on:
 #   - macOS   -> universal (arm64 + x86_64) "Fountain.bundle" and "Fountain Over.bundle"
@@ -26,10 +27,10 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          # macos-14 and never macos-13: the Intel macOS runners are retired,
+          # macos-15 and never macos-13: the Intel macOS runners are retired,
           # so x86_64 is cross-compiled from Apple Silicon. CMakeLists.txt's
           # CMAKE_OSX_ARCHITECTURES does that on its own.
-          - { name: macos-universal, os: macos-14 }
+          - { name: macos-universal, os: macos-15 }
           - { name: windows-x86_64,  os: windows-latest }
     steps:
       - uses: actions/checkout@v7
@@ -46,17 +47,33 @@ jobs:
       # GLEW comes from vcpkg, static-linked (static-md keeps the CRT dynamic
       # so the plugin matches the host) so the .dll has no external
       # glew32.dll runtime dependency.
+      #
+      # Applocal off: with a static triplet there is no DLL for vcpkg to copy,
+      # and isohypse's two plugins once raced each other's copy step to an
+      # exit 32. Fountain builds two plugins, so the race is real here.
       - name: Configure (Windows)
         if: runner.os == 'Windows'
         run: >
           cmake -B build -A x64
           -DCMAKE_BUILD_TYPE=Release
           -DFOUNTAIN_BUILD_TOOLS=OFF
+          -DVCPKG_APPLOCAL_DEPS=OFF
           -DVCPKG_TARGET_TRIPLET=x64-windows-static-md
           -DCMAKE_TOOLCHAIN_FILE="$env:VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake"
 
       - name: Build
         run: cmake --build build --config Release --parallel
+
+      # The shipped DLLs, loaded as a host loads them: see tools/wincheck.ps1.
+      # -Params is each plugin's control table plus the About block (its text
+      # and four buttons); it changes whenever either does.
+      - name: Check the DLLs (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          ./tools/wincheck.ps1 -Dll "build/Release/Fountain.dll" -Name "SW Fountain" -Id FT01 -Kind source -Params 24
+          if( $LASTEXITCODE ) { exit $LASTEXITCODE }
+          ./tools/wincheck.ps1 -Dll "build/Release/Fountain Over.dll" -Name "SW Fountain Over" -Id FT02 -Kind effect -Params 23
+          if( $LASTEXITCODE ) { exit $LASTEXITCODE }
 
       - name: Derive version
         id: ver
@@ -99,6 +116,9 @@ jobs:
             cp "build/Release/Fountain.dll" "out/Fountain.dll"
             cp "build/Release/Fountain Over.dll" "out/Fountain Over.dll"
           fi
+          # GLEW and the FFGL SDK are BSD-licensed and built into the binaries,
+          # so their notices travel with them.
+          cp ATTRIBUTIONS.md out/
           ls -R out
 
       - name: Archive (zip)
@@ -139,10 +159,10 @@ jobs:
     name: Windows installer
     needs: build
     runs-on: ubuntu-latest
-    # makensis cross-compiles, so the installer is wrapped here from the zip
-    # the Windows job uploaded. Its directory page defaults to the common FFGL
-    # folder but stays editable, because Resolume reads plugins from a path
-    # the user chooses per edition.
+    # makensis cross-compiles, so the installer is wrapped here from the zip the
+    # Windows job uploaded. --ffgl points its directory page at
+    # Documents\Resolume Arena\Extra Effects, the folder Resolume reads, and
+    # leaves it editable for Avenue's.
     steps:
       - uses: actions/checkout@v7
 
@@ -166,9 +186,10 @@ jobs:
           rm -rf "$stage"; mkdir -p "$stage"
           unzip -q "$zip" -d "$stage"
           cp README.md "$stage/" 2>/dev/null || true
-          # --plain: a plugin needs neither a shortcut nor a PATH entry. It was --cli
-          # until nib#2 (the same fix, carried over), where the unguarded PATH write wiped a system PATH.
-          rl_nsis windows-x86_64 "$stage" --plain
+          # --ffgl: per user, into Documents\Resolume Arena\Extra Effects
+          # (Avenue's where only Avenue is installed), with no shortcut and no
+          # PATH entry.
+          rl_nsis windows-x86_64 "$stage" --ffgl
           ls -l installers
 
       - uses: actions/upload-artifact@v7

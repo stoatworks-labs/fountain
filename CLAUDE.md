@@ -87,10 +87,13 @@ plume, the clock, or the onset detector.
 - **Provisional hand copies:** `source/StoatworksAbout*.h` (guide = "", no user guide) and
   `ATTRIBUTIONS.md`. Once the project is registered in stoatworks-backend, `sync-about.py`
   and `sync-attributions.py` generate them; edit them there then.
-- `.github/workflows/` has never run: no remote. GitHub Actions only on a public repo; if
-  this is ever created private, delete them first.
-- Local only: `~/dev/fountain`, no remote, nothing released, not on the website, never
-  loaded into Resolume. The spec is `~/Projects/resolume/specs/SPEC-fountain.md`.
+- `.github/workflows/`: `ci.yml` (macOS `--offline`, the Windows build) on every push and
+  PR; `release.yml` builds both platforms on a dispatch and publishes on a `v*` tag, the
+  Windows DLLs checked by `tools/wincheck.ps1` (24 and 23 parameters). GitHub Actions only
+  because the repo is public; if it is ever made private, delete them first.
+- Public repo `stoatworks-labs/fountain` since 2026-11-18; the fleet checkout is
+  `~/Projects/resolume/fountain` (worktrees for every edit). The spec is
+  `~/Projects/resolume/specs/SPEC-fountain.md`.
 
 ## Diagnostics
 

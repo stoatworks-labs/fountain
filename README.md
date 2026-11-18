@@ -130,7 +130,7 @@ Over **1.02** and **2.19 ms** at 720p and 1080p; the Screen layout at full flow 
 
 - **No host has loaded it.** Not Arena, not Avenue, on any platform; no sound has reached it.
   `oxbow` (the fleet's test host) reads both bundles and renders through them, which is all.
-- **Windows** has never been built. The CI workflow that would is in the repo and has never run.
+- **Windows** has not been built yet: the repo's CI builds it on its first push.
 - **Chosen, not measured:** how hard a nozzle is disturbed (Breakup), the valve and pump lags
   and the valve law (a half-open valve halves the speed), and all of the mist: its drop size,
   settling speed, the updraft that stands in for entrainment, its spread and evaporation, the

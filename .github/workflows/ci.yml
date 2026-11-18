@@ -1,8 +1,8 @@
 name: ci
 
-# ferrofluid's CI, adapted. NEVER RUN: this repo has not been pushed anywhere.
-# GitHub Actions minutes are free on public repos only (the fleet's rule): if
-# this repo is ever created private, delete this file and release.yml first.
+# ferrofluid's CI, adapted, and first run when the repo went public on
+# 2026-11-18. GitHub Actions minutes are free on public repos only (the fleet's
+# rule): if this repo is ever made private, delete this file and release.yml.
 #
 # macOS and Windows. The CMakeLists branches on APPLE and WIN32 and has no
 # Linux path at all, so ubuntu is not an option. The Windows job is pitch's,
@@ -24,7 +24,7 @@ on:
 jobs:
   macos:
     name: macOS
-    runs-on: macos-14
+    runs-on: macos-15
     steps:
       - uses: actions/checkout@v7
         with:
