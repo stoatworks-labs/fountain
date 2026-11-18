@@ -1,11 +1,13 @@
 # fountain
 
 > **AI-assisted project.** This codebase was created with [Claude](https://claude.com/claude-code)
-> (Anthropic), directed and reviewed by a human author. **It has never been loaded into
-> Resolume.** What's established is established by an offline harness, `fttest`, that drives
-> the real plugin class through the same `ProcessOpenGL` a host calls, in a headless GL
-> context on a synthetic clock, on this Mac's GPU at two rasters, and reads the water back off
-> the pixels. A steady jet tops out at **v²/2g** to **0.07 px**; an arc falls along the
+> (Anthropic), directed and reviewed by a human author. In Arena on Windows (software
+> rendering) both plugins load with every control as declared and render, and every control
+> that can be tested without sound or a button press moves the picture; on a Mac, Arena loads
+> them but hasn't been seen rendering them. The water itself is established by an offline
+> harness, `fttest`, that drives the real plugin class through the same `ProcessOpenGL` a
+> host calls, in a headless GL context on a synthetic clock, on this Mac's GPU at two rasters,
+> and reads the water back off the pixels. A steady jet tops out at **v²/2g** to **0.07 px**; an arc falls along the
 > closed-form parabola to **0.2 px**; a shot rises as **Vt − gt²/2** to **0.08 px** and a tilted
 > one lands on the frame **2V sin θ/g** says. Beads stand **one Rayleigh wavelength (9.0144 a)**
 > apart on the picture, to **0.01 px** over the span, and the column ends at the closed-form
@@ -87,7 +89,24 @@ the arcs the Mid; the mist bar runs steady. The Over's defaults are the same fou
 
 ## Status
 
-**v0.1.0, local only, 16 November 2026. Never loaded into Resolume.**
+Version 0.1.0, released 2026-11-18.
+
+**In Arena on macOS** (7.29.0, M4 Max, 2026-11-18, the release workflow's universal build):
+both bundles load from Extra Effects and register, `SW Fountain` (`FT01`) as a source and
+`SW Fountain Over` (`FT02`) as an effect. Neither was put on a clip: the release run had no
+control of Arena's window, so nothing has been seen rendering in Arena on a Mac.
+
+**In Arena on Windows** (7.27.1 on Mesa llvmpipe, software rendering, no sound device,
+2026-11-18, the release workflow's Windows build): both DLLs load from Extra Effects and
+register as `SW Fountain` / `FT01` / source and `SW Fountain Over` / `FT02` / effect; all 24
+controls of the source and 24 of the Over (its 23 and Arena's Opacity) match their declared
+names, order, types, ranges and defaults; both render (the Over at its defaults 56.5 levels
+from its bare input), and every control the fleet's gate can move changes the picture: 16 of
+the source's and 16 of the Over's, Opacity included. Audio and Sensitivity need sound the box
+doesn't have, and Fire is a button the gate never presses (`fttest --clock` and `--flight`
+press it and measure the shot). Arena's log stayed clean. Arena's clock arrived in
+milliseconds (186 534.97 on the 60th frame) and the plugin's vote settled on them. Software
+rendering says nothing about a GPU or about speed.
 
 ### Measured offline, on macOS
 
@@ -128,9 +147,16 @@ Over **1.02** and **2.19 ms** at 720p and 1080p; the Screen layout at full flow 
 
 ### Not established
 
-- **No host has loaded it.** Not Arena, not Avenue, on any platform; no sound has reached it.
-  `oxbow` (the fleet's test host) reads both bundles and renders through them, which is all.
-- **Windows** has not been built yet: the repo's CI builds it on its first push.
+- **Arena rendering it on a Mac**, Avenue on either platform, and Windows on a GPU.
+- **No real music has reached it** in any host: the audio controls were checked with the
+  harness's synthetic spectrum only. Onsets listen to the lowest quarter of Resolume's 64
+  bins, on the assumption that kicks and snares sit there; where those bins sit in frequency
+  hasn't been measured.
+- **Open questions** the guide lists as known limits: should the mist follow the music,
+  slowly (it runs steady; following the high band made the Over pulse with the hi-hats); is
+  ln 9 a fair default disturbance; should SW Fountain Over light the basin (it is black below
+  the waterline); and which unit Arena's clock arrives in on a Mac. Arena 7.27.1 on Windows
+  sent milliseconds (186 534.97 on the 60th frame) and the plugin's vote settled on them.
 - **Chosen, not measured:** how hard a nozzle is disturbed (Breakup), the valve and pump lags
   and the valve law (a half-open valve halves the speed), and all of the mist: its drop size,
   settling speed, the updraft that stands in for entrainment, its spread and evaporation, the
@@ -141,7 +167,12 @@ Over **1.02** and **2.19 ms** at 720p and 1080p; the Screen layout at full flow 
 - The fountain is seen face-on and has no depth.
 - The defaults were chosen over six of Resolume's bundled clips through `--pipe`, looked at as
   stills, not in a show.
-- No user guide, no presets and no OpenFX port.
+- Only ever run on an Apple M4 Max, although the macOS build has an Intel slice. No presets
+  and no OpenFX port.
+
+The [user guide](https://stoatworks-labs.com/software/fountain/guide/) (also
+[docs/USER-GUIDE.md](docs/USER-GUIDE.md)) explains every control and lists these as known
+limits.
 
 ## Browser demo
 

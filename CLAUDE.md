@@ -21,7 +21,7 @@ plume, the clock, or the onset detector.
 - Fast dev build: add `-DCMAKE_OSX_ARCHITECTURES=arm64`
 - Build: `cmake --build build -j8`
 - Install to Resolume: `cmake --install build` (both bundles into Arena's Extra Effects).
-  Never from a shared session on this Mac: nothing here has been loaded into Arena.
+  Never from a shared session on this Mac: Allan's Arena opens his show composition.
 - Render offline: `./build/fttest --out /tmp/f.png` (the source on its defaults at 120 BPM, 3 s in);
   the summary line gives nozzles, beads, spray parcels, shots, the breakup age and px a metre
 - The Over: `./build/fttest --over --out /tmp/o.png` (the harness's card as the clip),

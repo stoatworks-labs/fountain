@@ -170,8 +170,15 @@ that Resolume's 64 FFT bins put kicks in the lowest quarter (nobody in the fleet
 where they sit in frequency); that Resolume sends SetTime and SetBeatInfo every frame as
 ferrofluid assumes.
 
-Not done: loading it into Resolume on any platform; real music; a Windows build; a user
-guide, presets, an OpenFX port, a browser demo (not required this round).
+In Arena (2026-11-18, v0.1.0): on win-lab (7.27.1, llvmpipe, no sound device) the release's
+Windows DLLs load and register, every control matches its declaration (the Over's 23 plus
+Arena's Opacity), both render, and all 16 testable controls of each move the picture (Audio and
+Sensitivity need sound, Fire is a button the gate never presses); Arena's clock arrived in
+milliseconds and the vote settled on them. On this Mac (7.29.0) Arena loaded and registered
+both bundles; neither was put on a clip. The expectation is plugin-bench's
+`arena/expect/fountain.json`.
+
+Not done: Arena rendering it on a Mac; real music; Windows on a GPU; presets, an OpenFX port.
 
 ## Would this hold on another rasteriser, at another raster?
 
@@ -306,7 +313,7 @@ main. Both plugins on one page; `?plugin=over` opens the Over.
   premultiplied by the kit where the plugin expects straight colour (so the kit's alpha clip
   is left out); Fire is a press-and-release button; the About block is off the panel; GL is
   WebGL2 with float render targets and float blending, refused without them; nothing is
-  measured and the plugin has never been in Resolume.
+  measured here (the plugin's own Arena results are in the README's Status).
 - **Found in the plugin, and fixed before the release**: a Fire press arriving on a frame
   where no time passes was lost (ProcessOpenGL zeroed `firePresses`, and `Sim::Advance`
   returned before the valves when `dt <= 0`). A paused page showed it (a redraw is such a
@@ -320,10 +327,9 @@ main. Both plugins on one page; `?plugin=over` opens the Over.
   task as the frame (`preserveDrawingBuffer` is false); the read-outs need a converter
   instance before the renderer exists, or they show 0..1 until first touched; a long Audio
   buffer option overflowed a 390 px screen.
-- **Not done, and not this repo's to do**: `stoatworks-backend/resolume-demo/sync.sh`'s repo
-  list lacks fountain (`demo/vendor/` was copied by hand); `index.html` has no
-  `project-page` meta, `og:image` or `twitter:card` yet, and its `<noscript>` no project-page
-  or guide links, all waiting on the website's page.
+- **Done at the release** (2026-11-18): `stoatworks-backend/resolume-demo/sync.sh` lists
+  fountain, and `index.html` has the `project-page` meta, an `og:image` (the site's thumbnail)
+  with a large `twitter:card`, and project-page and guide links in its `<noscript>`.
 
 ## Open questions
 
