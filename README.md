@@ -30,6 +30,42 @@ right, its lower edge torn into dark holes, all mirrored dimly in the basin](doc
 <sub>One frame of the source, rendered by `fttest`, not captured from Resolume: the defaults
 at 120 BPM with the harness's kicks in the Audio buffer, 5.5 s in (`--kicks --frames 330`).</sub>
 
+<!-- downloads:start -->
+
+## Download
+
+**[v0.1.0](https://github.com/stoatworks-labs/fountain/releases/tag/v0.1.0)** — prebuilt for macOS and Windows. Pick your platform:
+
+<details>
+<summary><b>macOS</b> — Universal (Apple Silicon + Intel)</summary>
+
+| Build | Download | Size |
+| --- | --- | --- |
+| Universal (Apple Silicon + Intel) · .dmg disk image | [`fountain-0.1.0-macos-universal.dmg`](https://github.com/stoatworks-labs/fountain/releases/download/v0.1.0/fountain-0.1.0-macos-universal.dmg) | 547 KB |
+| Universal (Apple Silicon + Intel) · .zip archive | [`fountain-macos-universal.zip`](https://github.com/stoatworks-labs/fountain/releases/latest/download/fountain-macos-universal.zip) | 486 KB |
+
+</details>
+
+<details>
+<summary><b>Windows</b> — x64</summary>
+
+| Build | Download | Size |
+| --- | --- | --- |
+| x64 · .exe installer | [`fountain-0.1.0-windows-x86_64-setup.exe`](https://github.com/stoatworks-labs/fountain/releases/download/v0.1.0/fountain-0.1.0-windows-x86_64-setup.exe) | 270 KB |
+| x64 · .zip archive | [`fountain-windows-x86_64.zip`](https://github.com/stoatworks-labs/fountain/releases/latest/download/fountain-windows-x86_64.zip) | 271 KB |
+
+</details>
+
+All builds, checksums and release notes: [github.com/stoatworks-labs/fountain/releases](https://github.com/stoatworks-labs/fountain/releases).
+
+macOS builds are signed and notarised and open normally. The Windows builds are unsigned, so SmartScreen warns once.
+
+<!-- downloads:end -->
+
+## Video
+
+[![Fountain: water late by its flight time, a musical fountain for Resolume](docs/video-thumb.png)](https://www.youtube.com/watch?v=Woa8E3tugUw)
+
 ## The one idea
 
 **The music opens valves; the water is a ballistic object; the picture is wherever the water
