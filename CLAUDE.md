@@ -86,9 +86,12 @@ plume, the clock, or the onset detector.
 - `fountain_core` is an OBJECT library: each plugin registers itself from a file-scope
   constructor nothing references.
 - The macOS build must be universal. Check with `lipo`, never the build log.
-- **Provisional hand copies:** `source/StoatworksAbout*.h` (guide = "", no user guide) and
-  `ATTRIBUTIONS.md`. Once the project is registered in stoatworks-backend, `sync-about.py`
-  and `sync-attributions.py` generate them; edit them there then.
+- **Generated, never edited here:** `source/StoatworksAbout.h` (stoatworks-backend's
+  `scripts/sync-about.py`, from the website's projects.json; its guide link puts a User
+  guide button second in the About block, so the source declares 24 parameters and the Over
+  23) and `ATTRIBUTIONS.md` with the README's attributions block
+  (`scripts/sync-attributions.py`). The header is a .wasm input: rerun
+  `demo/tools/build-wasm.sh` after a sync changes it.
 - `.github/workflows/`: `ci.yml` (macOS `--offline`, the Windows build) on every push and
   PR; `release.yml` builds both platforms on a dispatch and publishes on a `v*` tag, the
   Windows DLLs checked by `tools/wincheck.ps1` (24 and 23 parameters). GitHub Actions only
