@@ -141,7 +141,18 @@ Over **1.02** and **2.19 ms** at 720p and 1080p; the Screen layout at full flow 
 - The fountain is seen face-on and has no depth.
 - The defaults were chosen over six of Resolume's bundled clips through `--pipe`, looked at as
   stills, not in a show.
-- No user guide, no presets, no OpenFX port and no browser demo.
+- No user guide, no presets and no OpenFX port.
+
+## Browser demo
+
+[fountain-demo.stoatworks-labs.com](https://fountain-demo.stoatworks-labs.com/) runs both
+plugins in your browser: their own C++, the plugin class with its whole simulation, clock and
+audio analyser, compiled unmodified to WebAssembly and drawing with their own GLSL in WebGL2.
+The page is the host. Its tempo stands in for Resolume's, a browser has no audio (so the Audio
+buffer holds nothing, or `fttest`'s test kicks if you pick them), and SW Fountain Over runs on
+generated clips or a picture of your own. A frame of the page matched `fttest`'s on the same
+settings to one 8-bit code, both plugins, with the valves held open. It is a demo, not the
+plugin, and the page lists what it leaves out.
 
 ## Build
 

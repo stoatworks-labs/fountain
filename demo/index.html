@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Fountain — browser demo | Stoatworks Labs</title>
+    <meta name="description" content="Try the Fountain FFGL source and effect for Resolume in your browser: a musical fountain at night whose valves open on the beat, its water flying as jets that break into beads and a mist screen the wind tears, or your clip projected onto that water. The plugin's own C++ compiled unmodified to WebAssembly, drawing with its own GLSL in WebGL2. A demo, not the plugin." />
+    <link rel="icon" href="data:," />
+    <link rel="stylesheet" href="./vendor/kit.css" />
+    <link rel="canonical" href="https://fountain-demo.stoatworks-labs.com/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Stoatworks Labs" />
+    <meta property="og:title" content="Fountain — browser demo | Stoatworks Labs" />
+    <meta property="og:description" content="Try the Fountain FFGL source and effect for Resolume in your browser: a musical fountain at night whose valves open on the beat, its water flying as jets that break into beads and a mist screen the wind tears, or your clip projected onto that water. The plugin's own C++ compiled unmodified to WebAssembly, drawing with its own GLSL in WebGL2. A demo, not the plugin." />
+    <meta property="og:url" content="https://fountain-demo.stoatworks-labs.com/" />
+  </head>
+  <body>
+    <main id="demo">
+      <noscript>
+        <h1>Fountain</h1>
+        <p>
+          A musical fountain for Resolume Arena and Avenue, as two FFGL plugins:
+          SW Fountain, a source that is a fountain at night lit by its own lamps,
+          and SW Fountain Over, an effect that projects your clip onto the same
+          fountain's water. The beat opens solenoid valves, a pump's head follows
+          the music, and the water flies as jets that break into beads, and as a
+          mist screen the wind tears.
+        </p>
+        <p>
+          This demo runs the plugin's own C++, compiled to WebAssembly, and its
+          shaders in your browser, so it needs JavaScript and WebGL2.
+        </p>
+        <ul>
+          <li><a href="https://github.com/stoatworks-labs/fountain">Source on GitHub</a></li>
+        </ul>
+      </noscript>
+    </main>
+
+    <script type="module" src="./plugin.js"></script>
+    <script
+      src="./vendor/support-footer.js"
+      defer
+      data-app="Fountain"
+      data-repo="https://github.com/stoatworks-labs/fountain"
+      data-note="A browser demo of the plugin's own C++ and shaders, compiled to WebAssembly and WebGL2. Nothing you load here leaves your machine."
+    ></script>
+  </body>
+</html>

@@ -36,7 +36,8 @@ plume, the clock, or the onset detector.
 - Constants: `python3 tools/constants.py` prints Rayleigh's numbers that `source/Water.h` carries.
 
 ## Verify
-- Everything: `tools/verify.sh` (GLSL reserved words, `glslc`, the submodule pin, a fresh
+- Everything: `tools/verify.sh` (GLSL reserved words, `glslc`, the demo's copies of the
+  shaders and its .wasm's sources, the submodule pin, a fresh
   universal build with no warnings, both bundles through lipo, plist, ad-hoc signature,
   `oxbow probe` and `selftest` when `OXBOW=` points at one; every check at 1280x720 and
   320x180; ten again on Apple's software renderer; `--offline`; `--pipe` for both; the
@@ -94,6 +95,22 @@ plume, the clock, or the onset detector.
 - Public repo `stoatworks-labs/fountain` since 2026-11-18; the fleet checkout is
   `~/Projects/resolume/fountain` (worktrees for every edit). The spec is
   `~/Projects/resolume/specs/SPEC-fountain.md`.
+
+## Browser demo
+- `demo/` is served at https://fountain-demo.stoatworks-labs.com/ by the Worker in
+  `wrangler.toml` (a route, plus a proxied AAAA `100::` record for `fountain-demo`: delete the
+  record and the page goes dark while deploys stay green). `.github/workflows/deploy.yml`
+  redeploys it on every push to main; by hand: `cf-run npx wrangler deploy`.
+- **`demo/fountain-core.{js,wasm}` is the plugin's C++, compiled and committed.** After ANY
+  change under `source/` (the generated `StoatworksAbout*.h` included), run
+  `demo/tools/build-wasm.sh` (emscripten's `em++`) and commit both outputs and
+  `demo/wasm/inputs.sha256`; `tools/verify.sh` fails until you do.
+- `demo/shaders.js` is a copy: after changing a shader, `python3 demo/tools/check_shaders.py
+  --write`. The same script checks the glue's copy of fttest's `feedKicks` and the .wasm's
+  input hashes.
+- `demo/vendor/` is the shared kit (`stoatworks-backend/resolume-demo`); never edit it.
+- Keep the page's presets thin and steady: no full-frame or large-area flash faster than
+  three a second (AGENTS.md has the measurement).
 
 ## Diagnostics
 

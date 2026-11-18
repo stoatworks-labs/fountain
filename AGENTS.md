@@ -233,6 +233,87 @@ against the wind (`--wind`), the drag constant g·v_t² (`--drag`), the breakup 
 - **Lead** is barely alive on the Over (0.019): it moves a jet a few frames, which the Over
   shows only where the jet is lit, a sliver against the full screen.
 
+## The browser demo (2026-11-18)
+
+https://fountain-demo.stoatworks-labs.com/, from `demo/`, deployed by `wrangler.toml` (a
+Worker route: the zone is at Cloudflare's 100 custom domains, so `fountain-demo` is a proxied
+AAAA `100::` record made through the API) and `.github/workflows/deploy.yml` on every push to
+main. Both plugins on one page; `?plugin=over` opens the Over.
+
+- **It runs the plugin, it doesn't port it.** `demo/fountain-core.wasm` is `Fountain.cpp` and
+  everything it calls (Sim, Water, Layout, Controls, Audio, PassBuffer, Shaders, Diag) plus the
+  FFGL SDK's plugin classes, FFGLShader and FFGLFBO, compiled unmodified by emscripten
+  (`demo/tools/build-wasm.sh`, polyhedral's pattern). Chosen over a JavaScript port because
+  the physics is 1,500 lines of double and state machines a port would only have a reader to
+  check. Left out: the two registration files.
+- **What is the page's**: `demo/wasm/glue.cpp` plays the host (constructs the plugin, reads
+  its declarations back through the SDK so the panel is built from them, forwards
+  SetFloatParameter, SetTime, SetBeatInfo, the Audio buffer and ProcessOpenGL, as fttest's
+  Rig does); `demo/wasm/gl_shim.cpp` takes four GL calls (glShaderSource, refusing any text
+  that isn't byte for byte the page's assembly of `demo/shaders.js`, then the kit's `port()`;
+  glEnable/glDisable/glIsEnabled, for GL_PROGRAM_POINT_SIZE, which WebGL2 lacks); the host
+  row (a tempo menu, and the Audio buffer: nothing, or fttest's `feedKicks` copied into the
+  glue); the read-outs' units, the tooltips and the presets (written in metres and seconds,
+  converted by the plugin's own inverse functions).
+- **Checked by `tools/verify.sh`** (`demo/tools/check_shaders.py`): every GLSL piece
+  character for character, the order AssembleVertex()/Assemble() join them and InitGL's
+  stage list, the glue's `pcg`, `hash01`, `writeSpectrum` and `feedKicks` against fttest's,
+  and the hashes of every input the .wasm was built from (`demo/wasm/inputs.sha256`). Any
+  change under `source/` needs `demo/tools/build-wasm.sh` rerun and its outputs committed.
+- **Compared with fttest, once (2026-11-18; the scripts are not in the repo and nothing
+  repeats them).** Headless Chrome on a hand-stepped 60 fps clock, 960x540, page frame 241
+  against `fttest --frames 240`: Fire On Steady, the source, max 1 code, no pixel off by more,
+  PSNR 92.6 dB; the Over on colour bars (the clip read back from the page at Mix 0 and fed to
+  `--clip`), max 1 code, PSNR 95.4 dB. At the defaults (beat-fired) the shot and bead counts
+  agree (63, 159) and 0.19% of pixels differ by more than a code, all at the next shots'
+  columns near the nozzles. The one-frame offset is the plugin's own: the frame its clock
+  vote settles on advances nothing (`settledJump`), which fttest skips with
+  `SetClockScaleForTest`, so the page's simulation runs a frame behind its host clock. The
+  beat stays aligned in host frames (the valves are timed from the host's bar phase and the
+  flight in simulation time), so this moves only which fttest frame a page frame equals.
+- **Also checked on the page**: every read-out in the plugin's units; View changes the
+  picture; Fire adds 7 shots playing; tempo 60, 120 and 174 BPM at Beat gives 28, 56 and 78
+  shots in 4 s; the kicks with Fire On Onset give 8 onsets and 56 shots in 4 s; the Plugin
+  switch resets to that constructor's defaults; a raster change; embed mode; no horizontal
+  scroll at 390 px; no console errors locally, and on the live host only the zone's injected
+  challenge-platform script refused by the CSP.
+- **Flashes**: measured on the real GPU, every preset and the defaults, both plugins (the
+  Over on the scene, bars and lights-on-black clips), with no audio and with the kicks, plus
+  a stress case outside the presets (Half Beat at 174 BPM, Exposure ×4, Screen and Gust at 1,
+  Pressure at its maximum, View 3 m). Relative luminance over the whole frame and 25
+  overlapping windows a third of the frame each way, WCAG's pair-of-opposing-0.1-changes
+  rule: **0 flashes a second in every case**; the largest one-frame change in any window was
+  0.011 on the shipped presets and 0.05 in the stress case. The mist bar, the only element
+  with a large area, runs at a drive of 1 whatever the music and changes with the gusts over
+  seconds; jets and beads are lines a few pixels wide.
+- **Every gap, as the page discloses it** (banner, the "does not reproduce" list): no audio
+  (the Audio buffer is the host row's; with nothing in it the heads run at 1 − Response, Onset
+  never fires, Sensitivity is dead); the tempo and bar phase are the page's; the clock is the
+  page's frame deltas (the vote settles in seconds within four frames, wall clock before
+  that, the settling frame advances nothing; Restart is a backward jump the plugin treats as
+  no time, so the water carries on); a Fire press while paused fires nothing (below); frames
+  are display refreshes; WebAssembly has no fused multiply-add and musl's libm (doubles
+  may differ in the last digits, not measured here; the PCG hashes cannot); the Over's clip is generated or the visitor's,
+  premultiplied by the kit where the plugin expects straight colour (so the kit's alpha clip
+  is left out); Fire is a press-and-release button; the About block is off the panel; GL is
+  WebGL2 with float render targets and float blending, refused without them; nothing is
+  measured and the plugin has never been in Resolume.
+- **Found in the plugin, not fixed here**: a Fire press arriving on a frame where no time
+  passes is lost. ProcessOpenGL hands `firePresses` to the simulation and zeroes it, and
+  `Sim::Advance` returns before it reaches the valves when `dt <= 0`. A paused page shows it
+  (a redraw is such a frame); a host that renders a frame twice at the same time would too.
+- **Traps hit**: SwiftShader is far too slow for this page's spray (a 30-frame step outran a
+  30 s timeout), so the headless checks ran on the real GPU through a Chrome wrapper that
+  drops cdpshot's `--disable-gpu` and adds `--use-angle=metal`; the kit's `?clip=` silently
+  falls back to the first clip for an id not in `sources`; `readPixels` must run in the same
+  task as the frame (`preserveDrawingBuffer` is false); the read-outs need a converter
+  instance before the renderer exists, or they show 0..1 until first touched; a long Audio
+  buffer option overflowed a 390 px screen.
+- **Not done, and not this repo's to do**: `stoatworks-backend/resolume-demo/sync.sh`'s repo
+  list lacks fountain (`demo/vendor/` was copied by hand); `index.html` has no
+  `project-page` meta, `og:image` or `twitter:card` yet, and its `<noscript>` no project-page
+  or guide links, all waiting on the website's page.
+
 ## Open questions
 
 - Should the mist follow the music at all? It's steady now (above); a slow follower of the
