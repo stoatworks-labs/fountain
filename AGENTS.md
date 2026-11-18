@@ -140,6 +140,14 @@ parallel) is not used.
   Over was black. The fallback above.
 - **A segment's first end mirrored passed `--apex`**: a column's top is each segment's far
   end, and those were untouched. It's `--range`'s mutant now, which it fails by 29 px.
+- **A Fire press on a frame with no time in it was lost** (found by the browser demo's
+  checks, fixed before v0.1.0 on 2026-11-18). ProcessOpenGL handed `firePresses` to the
+  simulation and zeroed it, and `Sim::Advance` returned before the valves when `dt <= 0`: the
+  first frame (no clock to step from), the frame the clock vote settles on, and any frame a
+  host draws twice at one time. The Sim now holds a press (and an onset) from such a frame
+  and fires it at the start of the next frame that has time; `--clock` checks both cases, and
+  its mutant forgets the held press. No other frame's result changed (every bit-exact check
+  still is).
 - **The sweep's first run**: Fire pressed at frame 40 had landed by frame 180 (now 150);
   Sensitivity was dead because the harness's kicks fire at any sensitivity (the ghost note);
   Lead and Sensitivity were too faint on the Over behind the full mist screen (swept on the
@@ -183,7 +191,7 @@ One line per check.
 - `--alpha`: yes to 1 code; Mix 0's bit-exactness needs only a texelFetch and a copy.
 - `--wind`: yes; a τ-weighted centroid over ~2 400 splats, 2 px.
 - `--state`: bit-exact, same context only (Apple's software renderer differs across contexts: honeydew's trap); on another renderer the claim is the same frame, not the same bits.
-- `--clock`: bit-exact, same context only, as `--state`; the unit check is state.
+- `--clock`: bit-exact, same context only, as `--state`; the unit check and the press on a frame with no time are state (shot counts and exact times).
 
 ## The negative controls and mutants
 
@@ -212,7 +220,7 @@ One line per check.
 
 `--alpha` has no negative control; its mutant (alpha mixed toward 0) is caught.
 
-`tools/mutate.sh`, 16 one-character mutants, each built arm64 and run at 320×180 under a
+`tools/mutate.sh`, 17 one-character mutants, each built arm64 and run at 320×180 under a
 300 s alarm, all caught: a segment's first end mirrored (`--range`), the source's Beer–Lambert
 sign (`--apex`), a bead mirrored (`--breakup`), a spray splat mirrored (`--wind`), the Over
 lighting dry air (`--screen`), the Over's alpha toward 0 (`--alpha`), Torricelli with 3 for 2
@@ -220,7 +228,7 @@ lighting dry air (`--screen`), the Over's alpha toward 0 (`--alpha`), Torricelli
 exponent h·τ (`--lag`), the beads' rise subtracted from the lead (`--lead`), the mist carried
 against the wind (`--wind`), the drag constant g·v_t² (`--drag`), the breakup age ln × q
 (`--breakup`), the clock fallback upside down (`--clock`), the cold start primed with 1
-(`--late`).
+(`--late`), a press on a frame with no time in it forgotten by the next frame (`--clock`).
 
 ## The sweep's honest list
 
@@ -291,17 +299,19 @@ main. Both plugins on one page; `?plugin=over` opens the Over.
   never fires, Sensitivity is dead); the tempo and bar phase are the page's; the clock is the
   page's frame deltas (the vote settles in seconds within four frames, wall clock before
   that, the settling frame advances nothing; Restart is a backward jump the plugin treats as
-  no time, so the water carries on); a Fire press while paused fires nothing (below); frames
+  no time, so the water carries on); a Fire press while paused waits for Play (below); frames
   are display refreshes; WebAssembly has no fused multiply-add and musl's libm (doubles
   may differ in the last digits, not measured here; the PCG hashes cannot); the Over's clip is generated or the visitor's,
   premultiplied by the kit where the plugin expects straight colour (so the kit's alpha clip
   is left out); Fire is a press-and-release button; the About block is off the panel; GL is
   WebGL2 with float render targets and float blending, refused without them; nothing is
   measured and the plugin has never been in Resolume.
-- **Found in the plugin, not fixed here**: a Fire press arriving on a frame where no time
-  passes is lost. ProcessOpenGL hands `firePresses` to the simulation and zeroes it, and
-  `Sim::Advance` returns before it reaches the valves when `dt <= 0`. A paused page shows it
-  (a redraw is such a frame); a host that renders a frame twice at the same time would too.
+- **Found in the plugin, and fixed before the release**: a Fire press arriving on a frame
+  where no time passes was lost (ProcessOpenGL zeroed `firePresses`, and `Sim::Advance`
+  returned before the valves when `dt <= 0`). A paused page showed it (a redraw is such a
+  frame); a host that renders a frame twice at one time would have too. The Sim now holds the
+  press and fires it at the start of the next frame with time (traps, above), so a press
+  while paused fires on Play.
 - **Traps hit**: SwiftShader is far too slow for this page's spray (a 30-frame step outran a
   30 s timeout), so the headless checks ran on the real GPU through a Chrome wrapper that
   drops cdpshot's `--disable-gpu` and adds `--use-angle=metal`; the kit's `?clip=` silently

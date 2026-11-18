@@ -1108,7 +1108,8 @@ int runState( const Perturb& perturb )
 int runClock( const Perturb& perturb )
 {
 	std::printf( "\n=== clock: a host clock at 4.99e8 ms (Resolume's has been seen there) renders the frames a clock from 0 s does,\n"
-	             "    and a clock left to settle its own unit settles on the right one\n" );
+	             "    a clock left to settle its own unit settles on the right one, and a Fire press on a frame the clock\n"
+	             "    did not move fires at the start of the next frame that has time\n" );
 	for( const Raster& raster : kRasters )
 	{
 		Rig zero, late;
@@ -1154,6 +1155,39 @@ int runClock( const Perturb& perturb )
 			       fmt( "%4dx%-4d a host clock in %s at 60 fps, rendered faster than real time: settled on %s by frame 60, and reads %.6f s (host %.6f s)",
 			            raster.w, raster.h, unit == 1.0 ? "seconds" : "milliseconds", got == 1.0 ? "seconds" : ( got == 0.001 ? "milliseconds" : "nothing" ),
 			            r.plugin.HostNow(), host ) );
+		}
+
+		//Fire on a frame with no time in it: the very first (there is no clock
+		//to measure a step from yet), and a host drawing the moment it has
+		//just drawn again. Fire On Onset with no audio, so only the presses
+		//fire; the centre shooter alone, so a press is one shot.
+		{
+			Rig r;
+			SimHooks solo;
+			solo.solo = 1ull << kRowCentre;
+			if( !startRig( r, raster.w, raster.h, perturb, solo ) )
+				return 1;
+			if( !r.Press( PT_FIRE ) || !r.Render( 1 ) )
+				return 1;
+			const Sim& sim         = r.plugin.State();
+			const std::uint64_t a  = sim.Shots();
+			const bool aAt         = a == 1 && sim.ShotTimes( kRowCentre ).back() == sim.FrameStart();
+			if( !r.Render( 29 ) )
+				return 1;
+			--r.frame;//the next frame is the moment just drawn
+			if( !r.Press( PT_FIRE ) )
+				return 1;
+			const std::uint64_t held = sim.Shots() - a;
+			if( !r.Render( 1 ) )
+				return 1;
+			const std::uint64_t b = sim.Shots() - a;
+			const bool bAt        = b == 1 && sim.ShotTimes( kRowCentre ).back() == sim.FrameStart();
+			Check( aAt && held == 0 && bAt,
+			       fmt( "%4dx%-4d Fire pressed on the first frame: %llu shot%s by the second, %s; pressed on a frame drawn at the moment before it: "
+			            "%llu shot%s while no time passed, %llu by the next frame, %s",
+			            raster.w, raster.h, static_cast< unsigned long long >( a ), a == 1 ? "" : "s", aAt ? "at its start" : "NOT at its start",
+			            static_cast< unsigned long long >( held ), held == 1 ? "" : "s", static_cast< unsigned long long >( b ),
+			            bAt ? "at its start" : "NOT at its start" ) );
 		}
 	}
 	return Verdict();

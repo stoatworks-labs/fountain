@@ -277,6 +277,8 @@ private:
 	double breakupAge = 1.0;
 	double barMin = 0.0, barMax = 0.0;
 	std::uint64_t shots = 0, beadSerial = 0;
+	int heldPresses = 0;   ///< presses that came on frames with no time in them
+	bool heldOnset  = false;///< the same, an onset
 };
 
 } // namespace fountain

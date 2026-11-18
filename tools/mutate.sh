@@ -39,6 +39,7 @@ MUTANTS=(
 	"source/Water.cpp|return std::max( 0.0, lnDisturbance ) / BreakupRate( a );|return std::max( 0.0, lnDisturbance ) * BreakupRate( a );|--breakup|C++: the breakup age ln( a / delta0 ) x q, / -> *"
 	"source/Fountain.cpp|clockScale  = hostDelta < 1.0 ? 1.0 : 0.001;|clockScale  = hostDelta > 1.0 ? 1.0 : 0.001;|--clock|C++: the clock-unit fallback upside down, < -> >"
 	"source/Audio.cpp|			flux = 0.0f;|			flux = 1.0f;|--late|C++: the cold start primed with a flux of 1, not 0, 0 -> 1"
+	"source/Sim.cpp|	heldPresses += in.presses;|	heldPresses  = in.presses;|--clock|C++: a press on a frame with no time in it forgotten by the next, += -> ' ='"
 )
 
 limit() {

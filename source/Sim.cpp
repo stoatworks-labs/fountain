@@ -64,6 +64,8 @@ void Sim::Reset()
 	mistHead     = 0.0;
 	plumeHead    = 0.0;
 	plumeScreen  = 0.0;
+	heldPresses  = 0;
+	heldOnset    = false;
 }
 
 bool Sim::active( int i ) const
@@ -619,8 +621,18 @@ void Sim::Advance( double dtIn, const SimInputs& in )
 	plumeHead   = lagStep( plumeHead, mistHead, dt, kPlumeLag );
 	plumeScreen = lagStep( plumeScreen, std::clamp( in.screen, 0.0, 1.0 ), dt, kPlumeLag );
 
+	//A frame with no time in it (the first, the clock settling its unit, a
+	//host drawing the same moment twice) launches nothing, so a press or an
+	//onset that arrives on one waits for the next frame that has time, and
+	//fires at its start. Dropped, it was a press of Fire that did nothing.
+	heldPresses += in.presses;
+	heldOnset    = heldOnset || in.onset;
 	if( dt <= 0.0 )
 		return;
+	inputs.presses = heldPresses;
+	inputs.onset   = heldOnset;
+	heldPresses    = 0;
+	heldOnset      = false;
 
 	//Valves, then everything launched inside the frame.
 	scheduleValves( dt );

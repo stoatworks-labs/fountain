@@ -12,7 +12,7 @@
 > breakup age to **0.08 px**. With **Lead**, the water peaks on the host's beat to **0.24
 > frames**; without it, an onset's water tops out **105 frames late**, its flight time, to
 > **0.2 frames**. The Over is the clip times the water to **0.0001 codes** and black exactly
-> where there's no water. **18** deliberately wrong models and **16** one-character mutants of
+> where there's no water. **18** deliberately wrong models and **17** one-character mutants of
 > the shipped code are all caught. How a nozzle is disturbed, the mist and the air are
 > **chosen**, not measured: see [Status](#status).
 
@@ -112,10 +112,10 @@ Release build (16 November 2026). Every check below runs at **two rasters**, 128
 | `--alpha` | the Over's alpha is mix(clip alpha, 1, Mix) to **0 codes**; at Mix 0 the clip comes through bit for bit (0 of 3 686 400 values) |
 | `--wind` | a puff from the mist bar drifts **35.82 px** in a second against the wind's 36.00 (8.96 against 9.00 at 320×180) |
 | `--state` | resized mid-run, the last frame is **0 values** different from a run that was always at the new size |
-| `--clock` | a host clock at 4.99e8 ms renders **0 values** different from one starting at 0; a clock left to settle its own unit, rendered faster than real time, settles on seconds or milliseconds correctly |
+| `--clock` | a host clock at 4.99e8 ms renders **0 values** different from one starting at 0; a clock left to settle its own unit, rendered faster than real time, settles on seconds or milliseconds correctly; Fire pressed on a frame where the clock did not move (the first, or one drawn twice) is **1 shot**, at the start of the next frame that has time |
 | `--pipe` | both plugins: 2.5 frames in, exactly 2 out; bad cues and settings refused; a closed stdout (`\| head -c 1`) exits 1, not 141 |
 | `--negative` | **18** deliberately wrong models, **18** caught |
-| mutation | **16** one-character mutants of the shipped GLSL and C++, **16** caught |
+| mutation | **17** one-character mutants of the shipped GLSL and C++, **17** caught |
 | `tools/sweep.py` | all **18** controls of the source and **17** of the Over measurably change the picture |
 | shaders | all 8 compile through `glslc`, not merely through Apple's driver |
 | the bundles | both universal (`x86_64 arm64`), export `plugMain`, ad-hoc sign; `oxbow` reads `SW Fountain` / `FT01` / `source` and `SW Fountain Over` / `FT02` / `effect` and renders through both |

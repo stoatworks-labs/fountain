@@ -41,7 +41,7 @@ plume, the clock, or the onset detector.
   universal build with no warnings, both bundles through lipo, plist, ad-hoc signature,
   `oxbow probe` and `selftest` when `OXBOW=` points at one; every check at 1280x720 and
   320x180; ten again on Apple's software renderer; `--offline`; `--pipe` for both; the
-  negative controls; 16 mutants; the sweep; the bench). `KEEP_BUILD=1` reuses `build-verify/`.
+  negative controls; 17 mutants; the sweep; the bench). `KEEP_BUILD=1` reuses `build-verify/`.
 - Every check at once: `./build/fttest --all`. One at a time, each at both rasters (`--size WxH`: that raster alone):
   - **No GL**: `--constants` (Rayleigh's numbers re-derived with a different Bessel routine,
     his printed table, IAPWS σ, Tanaka ρ, g_n).
@@ -59,9 +59,10 @@ plume, the clock, or the onset detector.
     water), `--alpha` (mix(clip alpha, 1, Mix); Mix 0 bit-exact), `--wind` (a puff drifts at
     the wind's speed).
   - **The rest**: `--state` (a resize changes nothing but the drawing), `--clock` (a clock
-    at 4.99e8 ms renders what one from 0 does; the unit settles offline).
+    at 4.99e8 ms renders what one from 0 does; the unit settles offline; a Fire press on a
+    frame with no time in it fires at the next one's start).
 - The checks can fail: `./build/fttest --negative` (18 wrong models), `tools/mutate.sh`
-  (16 mutants, arm64, 320x180, perl alarm at 300 s).
+  (17 mutants, arm64, 320x180, perl alarm at 300 s).
 - No dead controls: `python3 tools/sweep.py` (both plugins; `--bare` drops the contexts).
 - Render cost: `./build/fttest --bench` (720p, 1080p, one 4K run).
 - `FTTEST_RENDERER=software` runs any of it on Apple's software renderer.
